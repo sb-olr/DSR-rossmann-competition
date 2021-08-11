@@ -9,7 +9,6 @@ import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-#from data.data_path import DATA_DIRECTORY
 from src.utils.utils import metric
 
 DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
@@ -50,15 +49,15 @@ def main(input_filepath, output_filepath):
                 f'RMSPE: {round(result_dict[best_benchmark], 2)}%')
 
     logger.info('Run random forest model')
-    #result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8,
-    #                       max_depth=8)
-    #logger.info(f'The best performing random forest model has RMSPE: {result}%')
+    result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8,
+                           max_depth=8)
+    logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
     logger.info('Run gradient boost model')
-    #result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
-    #                                eta=0.1, max_depth= 7, subsample= 0.7)
+    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
+                                    eta=0.1, max_depth= 7, subsample= 0.7)
 
-    #logger.info(f'The best performing random forest model has RMSPE: {result}%')
+    logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
 
 
