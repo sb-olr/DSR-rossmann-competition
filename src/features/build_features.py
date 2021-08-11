@@ -63,7 +63,7 @@ def mean_encoding(df: pd.DataFrame, col: str, on: str):
     return map_dict
 
 
-def apply_mean_encoding(df_train: pd.DataFrame, df_test: pd.DataFrame, col: str, on: str, savepath=output_filepath):
+def apply_mean_encoding(df_train: pd.DataFrame, df_test: pd.DataFrame, col: str, on: str, savepath=DATA_DIRECTORY):
     #storetype_dict
     map_dict = mean_encoding(df_train, col, on)
     df_train[col+'_enc'] = df_train[col].map(map_dict).fillna(map_dict.get("NaN"))
