@@ -8,9 +8,10 @@ import json
 import pandas as pd
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-from data.data_path import DATA_DIRECTORY
+#from data.data_path import DATA_DIRECTORY
 from sklearn.model_selection import train_test_split
 
+DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
 
 @click.command()
 @click.argument('input_filepath', default=DATA_DIRECTORY, type=click.Path(exists=True))

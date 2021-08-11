@@ -7,8 +7,10 @@ import os
 import pandas as pd
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-from data.data_path import DATA_DIRECTORY
+#from data.data_path import DATA_DIRECTORY
 
+DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
+#DATA_DIRECTORY = os.path.join("../../", os.path.dirname(os.path.realpath(__file__)), 'data/')
 
 @click.command()
 @click.argument('input_filepath', default=DATA_DIRECTORY, type=click.Path(exists=True))

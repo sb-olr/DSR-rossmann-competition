@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-import sys
-sys.path.append('../')
+
 import logging
 import click
 import numpy as np
 import os
 import pandas as pd
+import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-from data.data_path import DATA_DIRECTORY
+#from data.data_path import DATA_DIRECTORY
 from src.utils.utils import metric
 
+DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
 
 @click.command()
 @click.argument('input_filepath', default=DATA_DIRECTORY, type=click.Path(exists=True))
@@ -48,15 +49,16 @@ def main(input_filepath, output_filepath):
     logger.info(f'The best performing benchmark model is always predicting the: {best_benchmark}, '
                 f'RMSPE: {round(result_dict[best_benchmark], 2)}%')
 
-    # logger.info('Run random forest model')
-    # result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8, max_depth=8)
-    # logger.info(f'The best performing random forest model has RMSPE: {result}%')
+    logger.info('Run random forest model')
+    #result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8,
+    #                       max_depth=8)
+    #logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
     logger.info('Run gradient boost model')
-    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
-                                    eta=0.1, max_depth= 7, subsample= 0.7)
+    #result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
+    #                                eta=0.1, max_depth= 7, subsample= 0.7)
 
-    logger.info(f'The best performing random forest model has RMSPE: {result}%')
+    #logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
 
 
@@ -80,13 +82,14 @@ def train_benchmark(X_train, X_test, y_train, y_test):
     return result_dict
 
 
-def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_features, max_depth:int):
+def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_features,
+                  max_depth:int, n_jobs=-1, random_state=42):
     rf_model = RandomForestRegressor(n_estimators=n_estimators,
                                      max_features=max_features,
                                      max_depth=max_depth,
                                      criterion="mse",
-                                     random_state=42,
-                                     n_jobs=-1)
+                                     random_state=random_state,
+                                     n_jobs=n_jobs)
 
     y_train = y_train.to_numpy().flatten()
     y_test = y_test.to_numpy().flatten()
@@ -95,6 +98,9 @@ def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_featur
 
     y_pred = rf_model.predict(X_test)
     result = metric(y_pred, y_test)
+
+    # save model in JSON format
+    rf_model.save_model("rf_model.json")
 
     return round(result, 2)
 
@@ -109,7 +115,6 @@ def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_dep
                                 eta = eta
                                 )
 
-
     y_train = y_train.to_numpy().flatten()
     y_test = y_test.to_numpy().flatten()
 
@@ -117,6 +122,9 @@ def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_dep
 
     y_pred = xgboost_model.predict(X_test)
     result = metric(y_pred, y_test)
+
+    # save model in JSON format
+    xgboost_model.save_model("xgboost_model.json")
 
     return round(result, 2)
 
