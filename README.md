@@ -74,8 +74,7 @@ python src/models/predict_model.py
 ```angular2html
 ├── README.md         <- The top-level README for developers using this project.
 ├── data              <- Data folder with raw data and saved files.
-├── models            <- Trained and saved models
-│
+├── models             <- Folder with saved models.
 ├── notebooks          <- Jupyter notebooks.
 ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
 │                         generated with `pip freeze > requirements.txt`

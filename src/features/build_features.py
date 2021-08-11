@@ -2,13 +2,11 @@
 
 import logging
 import click
-import numpy as np
 import os
 import json
 import pandas as pd
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-#from data.data_path import DATA_DIRECTORY
 from sklearn.model_selection import train_test_split
 
 DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
@@ -64,12 +62,13 @@ def mean_encoding(df: pd.DataFrame, col: str, on: str):
     return map_dict
 
 
-def apply_mean_encoding(df_train: pd.DataFrame, df_test: pd.DataFrame, col: str, on: str, savepath=DATA_DIRECTORY):
-    #storetype_dict
+def apply_mean_encoding(df_train: pd.DataFrame, df_test:pd.DataFrame, col: str, on: str, savepath=DATA_DIRECTORY):
     map_dict = mean_encoding(df_train, col, on)
+
     df_train[col+'_enc'] = df_train[col].map(map_dict).fillna(map_dict.get("NaN"))
     df_test[col+'_enc'] = df_test[col].map(map_dict).fillna(map_dict.get("NaN"))
-    # os.path
+
+    # save dictionary
     with open(os.path.join(savepath, col+'_dict.json'), 'w') as fp:
         json.dump(map_dict, fp)
 
