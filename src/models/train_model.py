@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import sys
+sys.path.append('../')
 import logging
 import click
 import numpy as np
@@ -47,9 +48,18 @@ def main(input_filepath, output_filepath):
     logger.info(f'The best performing benchmark model is always predicting the: {best_benchmark}, '
                 f'RMSPE: {round(result_dict[best_benchmark], 2)}%')
 
-    logger.info('Run random forest model')
-    result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8, max_depth=8)
+    # logger.info('Run random forest model')
+    # result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8, max_depth=8)
+    # logger.info(f'The best performing random forest model has RMSPE: {result}%')
+
+    logger.info('Run gradient boost model')
+    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
+                                    eta=0.1, max_depth= 7, subsample= 0.7)
+
     logger.info(f'The best performing random forest model has RMSPE: {result}%')
+
+
+
 
 def train_benchmark(X_train, X_test, y_train, y_test):
     result_dict = {}
@@ -84,6 +94,28 @@ def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_featur
     rf_model.fit(X_train, y_train)
 
     y_pred = rf_model.predict(X_test)
+    result = metric(y_pred, y_test)
+
+    return round(result, 2)
+
+def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_depth:int, subsample:float, colsample_bytree:float, eta:float, n_jobs=-1, random_state=42):
+    xgboost_model=xgb.XGBRegressor(
+                                n_estimators = n_estimators,
+                                max_depth = max_depth,
+                                subsample = subsample,
+                                n_jobs= n_jobs,
+                                random_state= random_state,
+                                colsample_bytree = colsample_bytree,
+                                eta = eta
+                                )
+
+
+    y_train = y_train.to_numpy().flatten()
+    y_test = y_test.to_numpy().flatten()
+
+    xgboost_model.fit(X_train, y_train)
+
+    y_pred = xgboost_model.predict(X_test)
     result = metric(y_pred, y_test)
 
     return round(result, 2)
