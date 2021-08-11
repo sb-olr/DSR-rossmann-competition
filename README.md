@@ -2,9 +2,11 @@
 This mini competition is adapted from the Kaggle Rossman challenge.
 
 ## Setup environment
+Create a new environment and install the required libraries.
 ```angular2html
 pip install -r requirements.txt
 ```
+Note: If you are working on a new Macbook with M1 chip, it is possible that you have to additionally run `conda install -c conda-forge py-xgboost` to make xgboost work.
 
 ## Getting the data
 ```angular2html
