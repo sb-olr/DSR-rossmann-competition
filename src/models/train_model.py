@@ -5,6 +5,7 @@ import click
 import numpy as np
 import os
 import pandas as pd
+import pickle
 import xgboost as xgb
 from sklearn.ensemble import RandomForestRegressor
 from pathlib import Path
@@ -12,18 +13,19 @@ from dotenv import find_dotenv, load_dotenv
 from src.utils.utils import metric
 
 DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
+MODEL_DIRECTORY = os.path.join(os.getcwd(), "models/")
 
 @click.command()
 @click.argument('input_filepath', default=DATA_DIRECTORY, type=click.Path(exists=True))
-@click.argument('output_filepath', default=DATA_DIRECTORY, type=click.Path())
-def click_main(input_filepath, output_filepath):
+@click.argument('model_filepath', default=MODEL_DIRECTORY, type=click.Path())
+def click_main(input_filepath, model_filepath):
     """Interface for Click CLI."""
-    main(input_filepath=input_filepath, output_filepath=output_filepath)
+    main(input_filepath=input_filepath, model_filepath=model_filepath)
 
 
-def main(input_filepath, output_filepath):
+def main(input_filepath, model_filepath):
     """
-    Runs build features scripts.
+    Train different models.
     """
     logger = logging.getLogger(__name__)
     logger.info('Train models')
@@ -57,9 +59,7 @@ def main(input_filepath, output_filepath):
     result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
                                     eta=0.1, max_depth= 7, subsample= 0.7)
 
-    logger.info(f'The best performing random forest model has RMSPE: {result}%')
-
-
+    logger.info(f'The best performing gradient boosting model has RMSPE: {result}%')
 
 
 def train_benchmark(X_train, X_test, y_train, y_test):
@@ -98,8 +98,8 @@ def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_featur
     y_pred = rf_model.predict(X_test)
     result = metric(y_pred, y_test)
 
-    # save model in JSON format
-    rf_model.save_model("rf_model.json")
+    # save model
+    pickle.dump(rf_model, open(os.path.join(MODEL_DIRECTORY, "rf_model.dat"), "wb"))
 
     return round(result, 2)
 
@@ -122,8 +122,8 @@ def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_dep
     y_pred = xgboost_model.predict(X_test)
     result = metric(y_pred, y_test)
 
-    # save model in JSON format
-    xgboost_model.save_model("xgboost_model.json")
+    # save model
+    pickle.dump(xgboost_model, open(os.path.join(MODEL_DIRECTORY, "xgb_model.dat"), "wb"))
 
     return round(result, 2)
 

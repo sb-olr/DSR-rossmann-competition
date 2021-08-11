@@ -4,6 +4,7 @@ import logging
 import click
 import os
 import pandas as pd
+import pickle
 import json
 import xgboost as xgb
 from pathlib import Path
@@ -11,21 +12,20 @@ from dotenv import find_dotenv, load_dotenv
 from src.utils.utils import metric
 from src.data.make_dataset import clean_data
 from src.features.build_features import impute_modes, impute_state_holiday
-#from data.data_path import DATA_DIRECTORY
 
-#DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
-DATA_DIRECTORY = '/Users/maudgrol/Documents/Data_Science_Retreat/DSR-rossmann-competition/data/'
+DATA_DIRECTORY = os.path.join(os.getcwd(), "data/")
+MODEL_DIRECTORY = os.path.join(os.getcwd(), "models/")
 
 @click.command()
 @click.argument('input_filepath', default=DATA_DIRECTORY, type=click.Path(exists=True))
-@click.argument('output_filepath', default=DATA_DIRECTORY, type=click.Path())
+@click.argument('model_filepath', default=MODEL_DIRECTORY, type=click.Path(exists=True))
 @click.argument('testfile', default="holdout.csv")
-def click_main(input_filepath, output_filepath, testfile):
+def click_main(input_filepath, model_filepath, testfile):
     """Interface for Click CLI."""
-    main(input_filepath=input_filepath, output_filepath=output_filepath, testfile=testfile)
+    main(input_filepath=input_filepath, model_filepath=model_filepath, testfile=testfile)
 
 
-def main(input_filepath, output_filepath, testfile):
+def main(input_filepath, model_filepath, testfile):
     """
     Run model prediction on test data set
     """
@@ -61,8 +61,7 @@ def main(input_filepath, output_filepath, testfile):
     X = X[test_cols]
 
     logger.info('load pre-trained model')
-    model = xgb.XGBRegressor()
-    model.load_model("xgboost_model.json")
+    model = pickle.load(open(os.path.join(model_filepath, "xgb_model.dat"), "rb"))
 
     logging.info('Make model predictions')
     y_pred = model.predict(X)
