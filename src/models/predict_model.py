@@ -88,7 +88,10 @@ def test_mean_encoding(df: pd.DataFrame, col: str):
     with open(os.path.join(DATA_DIRECTORY, col+'_dict.json'), 'r') as fp:
         map_dict = json.load(fp)
 
-    df[col+'_enc'] = df[col].map(map_dict).fillna(map_dict.get("NaN"))
+    if col == "Store":
+        map_dict = {float(k): v for k, v in map_dict.items()}
+
+    df[col+'_enc'] = df[col].map(map_dict).fillna(map_dict.get(0.0,6837.459384267404))
 
     return df
 
@@ -96,6 +99,8 @@ def test_mean_encoding(df: pd.DataFrame, col: str):
 def test_create_cust(df: pd.DataFrame):
     with open(os.path.join(DATA_DIRECTORY, 'cust_dict.json'), 'r') as fp:
         cust_dict = json.load(fp)
+
+    cust_dict = {float(k): v for k, v in cust_dict.items()}
 
     df['Customers_enc'] = df['Store'].map(cust_dict)
 

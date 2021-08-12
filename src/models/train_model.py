@@ -57,7 +57,7 @@ def main(input_filepath, model_filepath):
     #logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
     logger.info('Run gradient boost model')
-    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.7,
+    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=1000, colsample_bytree= 0.7,
                               eta=0.1, max_depth= 6, subsample= 0.7)
     logger.info(f'The best performing gradient boosting model has RMSPE: {result}%')
 
@@ -102,7 +102,8 @@ def random_forest(X_train, X_test, y_train, y_test, n_estimators:int, max_featur
 
     return round(result, 2)
 
-def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_depth:int, subsample:float, colsample_bytree:float, eta:float, n_jobs=-1, random_state=42):
+def gradient_booster(X_train, X_test, y_train, y_test, n_estimators:int, max_depth:int, subsample:float,
+                     colsample_bytree:float, eta:float, n_jobs=-1, random_state=42):
     xgboost_model=xgb.XGBRegressor(
                                 n_estimators = n_estimators,
                                 max_depth = max_depth,
