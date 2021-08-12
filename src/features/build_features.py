@@ -56,8 +56,8 @@ def main(input_filepath, output_filepath):
 
 def mean_encoding(df: pd.DataFrame, col: str, on: str):
     # mean_encoding(df, "StoreType", "Sales")
-    overall_mean=df[on].mean()
-    map_dict = df.groupby(col).mean().loc[:, on].to_dict()
+    overall_mean = df.loc[:, on].mean()
+    map_dict = df.groupby([col]).mean().loc[:, on].to_dict()
     map_dict["NaN"] = overall_mean
     return map_dict
 
@@ -65,8 +65,8 @@ def mean_encoding(df: pd.DataFrame, col: str, on: str):
 def apply_mean_encoding(df_train: pd.DataFrame, df_test:pd.DataFrame, col: str, on: str, savepath=DATA_DIRECTORY):
     map_dict = mean_encoding(df_train, col, on)
 
-    df_train[col+'_enc'] = df_train[col].map(map_dict).fillna(map_dict.get("NaN"))
-    df_test[col+'_enc'] = df_test[col].map(map_dict).fillna(map_dict.get("NaN"))
+    df_train.loc[:, col+'_enc'] = df_train.loc[:, col].map(map_dict).fillna(map_dict.get("NaN"))
+    df_test.loc[:, col+'_enc'] = df_test.loc[:, col].map(map_dict).fillna(map_dict.get("NaN"))
 
     # save dictionary
     with open(os.path.join(savepath, col+'_dict.json'), 'w') as fp:
