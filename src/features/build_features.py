@@ -37,7 +37,9 @@ def main(input_filepath, output_filepath):
     # Get X and y
     y = df["Sales"]
     X = df.copy()
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,
+                                                        stratify=X[["Store"]],
+                                                        random_state=42)
 
     logger.info('Mean encode categorical vars')
     X_train, X_test = apply_mean_encoding(X_train, X_test, "StoreType", "Sales")
@@ -63,15 +65,15 @@ def mean_encoding(df: pd.DataFrame, col: str, on: str):
     # mean_encoding(df, "StoreType", "Sales")
     overall_mean = df.loc[:, on].mean()
     map_dict = df.groupby([col]).mean().loc[:, on].to_dict()
-    map_dict["NaN"] = overall_mean
+    map_dict[0.0] = overall_mean
     return map_dict
 
 
 def apply_mean_encoding(df_train: pd.DataFrame, df_test:pd.DataFrame, col: str, on: str, savepath=DATA_DIRECTORY):
     map_dict = mean_encoding(df_train, col, on)
 
-    df_train.loc[:, col+'_enc'] = df_train.loc[:, col].map(map_dict).fillna(map_dict.get("NaN"))
-    df_test.loc[:, col+'_enc'] = df_test.loc[:, col].map(map_dict).fillna(map_dict.get("NaN"))
+    df_train.loc[:, col+'_enc'] = df_train.loc[:, col].map(map_dict).fillna(map_dict.get(0.0))
+    df_test.loc[:, col+'_enc'] = df_test.loc[:, col].map(map_dict).fillna(map_dict.get(0.0))
 
     # save dictionary
     with open(os.path.join(savepath, col+'_dict.json'), 'w') as fp:
