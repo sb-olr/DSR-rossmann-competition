@@ -42,18 +42,25 @@ def main(input_filepath, model_filepath, testfile):
     clean_df = clean_data(data)
 
     logger.info('Check and fill missing values')
-    df = impute_modes(clean_df)
-    df = impute_state_holiday(df)
+    # hard coded modes for test set based on training set
+    mode_open = 1.0
+    mode_promo = 0.0
+    mode_sh = 0.0
+    clean_df["Open"].fillna(value=mode_open, inplace=True)
+    clean_df["Promo"].fillna(value=mode_promo, inplace=True)
+    clean_df["SchoolHoliday"].fillna(value=mode_sh, inplace=True)
+
+    df = impute_state_holiday(clean_df)
 
     logger.info('mean encode categorical vars')
-    df = apply_mean_encoding(df, "StoreType", "Sales")
-    df = apply_mean_encoding(df, "Assortment", "Sales")
-    df = apply_mean_encoding(df, "Store", "Sales")
+    df = test_mean_encoding(df, "StoreType", "Sales")
+    df = test_mean_encoding(df, "Assortment", "Sales")
+    df = test_mean_encoding(df, "Store", "Sales")
 
     y = df["Sales"]
     X = df.copy()
 
-    logger.info('Features used in the model')
+    logger.info('Features used in the model:')
     test_cols = ['Open', 'Promo', 'Month', 'Year', 'Weekday', 'SchoolHoliday',
                   'Holiday', 'StoreType_enc', 'Assortment_enc', 'Store_enc'
                   ]
@@ -70,7 +77,7 @@ def main(input_filepath, model_filepath, testfile):
     logger.info(f'Model performance RMSPE: {result}%')
 
 
-def apply_mean_encoding(df: pd.DataFrame, col: str, on: str):
+def test_mean_encoding(df: pd.DataFrame, col: str, on: str):
     with open(os.path.join(DATA_DIRECTORY, col+'_dict.json'), 'r') as fp:
         map_dict = json.load(fp)
 
