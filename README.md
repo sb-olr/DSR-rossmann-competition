@@ -2,7 +2,7 @@
 This mini competition is adapted from the Kaggle Rossman challenge.
 
 ## Setup environment
-Create a new environment and install the required libraries.
+Create a new environment and install the required libraries. This project was developed in Python 3.9.
 ```angular2html
 pip install -r requirements.txt
 ```
