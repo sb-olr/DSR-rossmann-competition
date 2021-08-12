@@ -32,19 +32,24 @@ def main(input_filepath, output_filepath):
     logger.info('Check and fill missing values')
     df = impute_modes(df_clean)
     df = impute_state_holiday(df)
-    
 
-    logger.info('train test split')
+    logger.info('Train test split')
     # Get X and y
     y = df["Sales"]
     X = df.copy()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
-    logger.info('mean encode categorical vars')
+    logger.info('Mean encode categorical vars')
     X_train, X_test = apply_mean_encoding(X_train, X_test, "StoreType", "Sales")
     X_train, X_test = apply_mean_encoding(X_train, X_test, "Assortment", "Sales")
     X_train, X_test = apply_mean_encoding(X_train, X_test, "Store", "Sales")
 
+    logger.info('Create customer feature')
+    X_train, X_test = customer_feature(X_train, X_test)
+
+    logger.info('Fill missing CompetionDistance data with median')
+    X_train.loc[:, "CompetitionDistance"].fillna(X_train.loc[:, "CompetitionDistance"].median(), inplace=True)
+    X_test.loc[:, "CompetitionDistance"].fillna(X_train.loc[:, "CompetitionDistance"].median(), inplace=True)
 
     X_train.to_csv(os.path.join(output_filepath, 'X_train.csv'), index=False)
     X_test.to_csv(os.path.join(output_filepath, 'X_test.csv'), index=False)
@@ -71,6 +76,19 @@ def apply_mean_encoding(df_train: pd.DataFrame, df_test:pd.DataFrame, col: str, 
     # save dictionary
     with open(os.path.join(savepath, col+'_dict.json'), 'w') as fp:
         json.dump(map_dict, fp)
+
+    return df_train, df_test
+
+def customer_feature(df_train: pd.DataFrame, df_test:pd.DataFrame, savepath=DATA_DIRECTORY):
+    # Create customer feature
+    cust_dict = df_train.groupby(["Store"]).mean().loc[:, "Customers"].to_dict()
+
+    # save dictionary
+    with open(os.path.join(savepath, 'cust_dict.json'), 'w') as fp:
+        json.dump(cust_dict, fp)
+
+    df_train.loc[:, 'Customers_enc'] = df_train.loc[:, 'Store'].map(cust_dict)
+    df_test.loc[:, 'Customers_enc'] = df_train.loc[:, 'Store'].map(cust_dict)
 
     return df_train, df_test
 

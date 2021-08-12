@@ -37,8 +37,9 @@ def main(input_filepath, model_filepath):
     y_test = pd.read_csv(os.path.join(input_filepath, 'y_test.csv'))
 
     logger.info('Features used during training')
-    train_cols = ['Open', 'Promo', 'Month', 'Year', 'Weekday', 'SchoolHoliday',
-            'Holiday', 'StoreType_enc', 'Assortment_enc', 'Store_enc'
+    train_cols = ['Promo', 'SchoolHoliday', 'CompetitionDistance', 'Month',
+              'Weekday', 'Holiday', 'Customers_enc', 'StoreType_enc',
+              'Assortment_enc', 'Store_enc'
             ]
     print(train_cols)
     X_train = X_train[train_cols]
@@ -50,17 +51,15 @@ def main(input_filepath, model_filepath):
     logger.info(f'The best performing benchmark model is always predicting the: {best_benchmark}, '
                 f'RMSPE: {round(result_dict[best_benchmark], 2)}%')
 
-    logger.info('Run random forest model')
-    result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.8,
-                           max_depth=8)
-    logger.info(f'The best performing random forest model has RMSPE: {result}%')
+    #logger.info('Run random forest model')
+    #result = random_forest(X_train, X_test, y_train, y_test, n_estimators=100, max_features=0.6,
+    #                      max_depth=7)
+    #logger.info(f'The best performing random forest model has RMSPE: {result}%')
 
     logger.info('Run gradient boost model')
-    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.8,
-                                    eta=0.1, max_depth= 7, subsample= 0.7)
-
+    result = gradient_booster(X_train, X_test, y_train, y_test, n_estimators=500, colsample_bytree= 0.7,
+                              eta=0.1, max_depth= 6, subsample= 0.7)
     logger.info(f'The best performing gradient boosting model has RMSPE: {result}%')
-
 
 def train_benchmark(X_train, X_test, y_train, y_test):
     result_dict = {}

@@ -53,16 +53,23 @@ def main(input_filepath, model_filepath, testfile):
     df = impute_state_holiday(clean_df)
 
     logger.info('mean encode categorical vars')
-    df = test_mean_encoding(df, "StoreType", "Sales")
-    df = test_mean_encoding(df, "Assortment", "Sales")
-    df = test_mean_encoding(df, "Store", "Sales")
+    df = test_mean_encoding(df, "StoreType")
+    df = test_mean_encoding(df, "Assortment")
+    df = test_mean_encoding(df, "Store")
+
+    logger.info('Create customer feature')
+    df = test_create_cust(df)
+
+    logger.info('Fill missing CompetionDistance data with median')
+    df.loc[:, "CompetitionDistance"].fillna(df.loc[:, "CompetitionDistance"].median(), inplace=True)
 
     y = df["Sales"]
     X = df.copy()
 
     logger.info('Features used in the model:')
-    test_cols = ['Open', 'Promo', 'Month', 'Year', 'Weekday', 'SchoolHoliday',
-                  'Holiday', 'StoreType_enc', 'Assortment_enc', 'Store_enc'
+    test_cols = ['Promo', 'SchoolHoliday', 'CompetitionDistance', 'Month',
+              'Weekday', 'Holiday', 'Customers_enc', 'StoreType_enc',
+              'Assortment_enc', 'Store_enc'
                   ]
     print(test_cols)
     X = X[test_cols]
@@ -77,11 +84,20 @@ def main(input_filepath, model_filepath, testfile):
     logger.info(f'Model performance RMSPE: {result}%')
 
 
-def test_mean_encoding(df: pd.DataFrame, col: str, on: str):
+def test_mean_encoding(df: pd.DataFrame, col: str):
     with open(os.path.join(DATA_DIRECTORY, col+'_dict.json'), 'r') as fp:
         map_dict = json.load(fp)
 
     df[col+'_enc'] = df[col].map(map_dict).fillna(map_dict.get("NaN"))
+
+    return df
+
+
+def test_create_cust(df: pd.DataFrame):
+    with open(os.path.join(DATA_DIRECTORY, 'cust_dict.json'), 'r') as fp:
+        cust_dict = json.load(fp)
+
+    df['Customers_enc'] = df['Store'].map(cust_dict)
 
     return df
 
